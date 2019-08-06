@@ -1,0 +1,51 @@
+public class TCPServer2 {
+    public static void main(String[] args) throws IOException {
+        //创建服务器对象
+        ServerSocket ss = new ServerSocket(8080);
+        //通过死循环使服务器一直接收客户端传输的数据
+        while(true){
+            //通过服务器对象获取客户端对象
+            Socket socket = ss.accept();
+            //创建多线程提高传输效率
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        //通过获取的客户端获取网络字节输入流对象
+                        InputStream is = socket.getInputStream();
+                        //判断传输的目的地文件夹是否存在
+                        File f = new File("D:\\AnLi");
+                        if (!f.exists()) {
+                            f.mkdirs();
+                        }
+                        //创建传输的文件名称
+                        String fileName = "TCP" + System.currentTimeMillis() + ".png";
+                        //创建本地字节输出流，将已获取的文件写入到服务器存储位置
+                        FileOutputStream fos = new FileOutputStream(f + "\\" + fileName);
+                        //通过客户端的字节输入流读取客户端上传的文件
+                        int len;
+                        byte[] bs = new byte[1024];
+                        while ((len = is.read(bs)) != -1) {
+                            fos.write(bs, 0, len);
+                        }
+                        //通过客户端的网络字节输出流对象，向客户端回写语句
+                        socket.getOutputStream().write("上传成功".getBytes());
+                        socket.close();
+                        fos.close();
+
+
+                    }catch (IOException e){
+                        System.out.println(e);
+                    }
+
+                }
+            }).start();
+
+        }
+        //如果服务器一直接收数据，服务器就不用关闭
+        //ss.close();
+
+
+
+    }
+}
