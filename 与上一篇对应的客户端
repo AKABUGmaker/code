@@ -1,0 +1,27 @@
+ public static void main(String[] args) throws IOException {
+        //创建字节输入流
+        FileInputStream fis = new FileInputStream("C:\\c.png");
+        //创建客户端对象
+        Socket socket = new Socket("localhost", 8080);
+        //创建客户端的字节输出流对象
+        OutputStream os = socket.getOutputStream();
+        //读取字节输入流中的本地文件
+        int len;
+        byte[] bs = new byte[1024];
+        while((len = fis.read(bs))!=-1){
+            //通过客户端的输出流将本地文件写入到服务器
+            os.write(bs,0,len);
+        }
+        //客户端上传文件后，加入一个结束标记
+        socket.shutdownOutput();
+        //创建客户端的字节输入流对象
+        InputStream is = socket.getInputStream();
+
+        //通过客户端的字节输入流读取服务器回写的数据
+        while((len = is.read(bs))!=-1){
+            System.out.println(new String(bs,0,len));
+        }
+
+        socket.close();
+        fis.close();
+    }
