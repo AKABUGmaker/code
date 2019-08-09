@@ -1,0 +1,31 @@
+public static void main(String[] args) throws Exception {
+        //注册数据库驱动
+        //DriverManager.registerDriver(new Driver());
+        //执行Driver中的静态代码块，避免冗余代码执行
+        Class.forName("com.mysql.jdbc.Driver");
+        //数据库的位置
+        String url = "jdbc:mysql://localhost:3306/day04_db";
+        //账号
+        String user = "root";
+        //密码
+        String password = "root";
+        //创建Connection连接通道
+        Connection conn = DriverManager.getConnection(url,user,password);
+        //通过conn对象方法获取sql语句的对象
+        Statement st = conn.createStatement();
+        //输入要发送给sql执行的语句
+        String sql = "select * from user";
+        //接收执行sql语句后返回的结果
+        ResultSet rs = st.executeQuery(sql);
+        while(rs.next()){
+            int id = rs.getInt("id");
+            String username = rs.getString("username");
+            String pwd = rs.getString("password");
+
+            System.out.println(id+"==="+username+"===="+pwd);
+        }
+
+        rs.close();
+        st.close();
+        conn.close();
+    }
