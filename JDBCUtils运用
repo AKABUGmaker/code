@@ -1,0 +1,17 @@
+public class JDBCDeleteDemo {
+public static void main(String[] args) {
+Connection conn = null;
+Statement stmt = null;
+try {
+conn = JDBCUtils.getConnection();
+stmt = conn.createStatement();
+String sql = “delete from user where id = 3”;
+int sum = stmt.executeUpdate(sql);
+System.out.println(sum);
+}catch (Exception e){
+throw new RuntimeException(e);
+}finally {
+JDBCUtils.release(conn,stmt,null);
+}
+}
+}
