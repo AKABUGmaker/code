@@ -1,0 +1,152 @@
+public class JDBCTemplate2 {
+    public static void main(String[] args) {
+        //test01();
+        //test02();
+        //test03();
+        //test04();
+        //test05();
+        //test06();
+        //test07();
+        //test08();
+        test09();
+
+    }
+    //增加记录
+    public static void test01() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        String sql = "insert into product values(null,?,?);";
+
+        jdbcTemplate.update(sql, "iphone3GS", 3333);
+        jdbcTemplate.update(sql, "iphone4", 5000);
+        jdbcTemplate.update(sql, "iphone4s", 5001);
+        jdbcTemplate.update(sql, "iphone5", 5555);
+        jdbcTemplate.update(sql, "iphone5c", 3888);
+        jdbcTemplate.update(sql, "iphone5s", 5666);
+        jdbcTemplate.update(sql, "iphone6", 6666);
+        jdbcTemplate.update(sql, "iphone6s", 7000);
+        jdbcTemplate.update(sql, "iphoneX", 8888);
+    }
+    //修改记录
+    public static void test02() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+
+        String sql = "update product set name=?,price=? where pid=?;";
+
+        int i = jdbcTemplate.update(sql, "XVIII", 18888, 10);
+        System.out.println(i);
+    }
+    //删除记录
+    public static void test03() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        String sql = "delete from product where pid=?;";
+        int i = jdbcTemplate.update(sql, 7);
+        //jdbcTemplate.update(sql,11);
+        //jdbcTemplate.update(sql,12);
+        //jdbcTemplate.update(sql,13);
+        //jdbcTemplate.update(sql,14);
+        //jdbcTemplate.update(sql,15);
+        //jdbcTemplate.update(sql,16);
+        //jdbcTemplate.update(sql,17);
+        //jdbcTemplate.update(sql,18);
+        System.out.println(i);
+    }
+    //查询一条记录
+    public static void test04() {
+        String sql = "select name from product where pid = 8;";
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        String s = jdbcTemplate.queryForObject(sql, String.class);
+        System.out.println(s);
+    }
+    //查询一条记录，将其封装为map集合
+    public static void test05() {
+        String sql = "select * from product where pid = ?;";
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        Map<String, Object> map = jdbcTemplate.queryForMap(sql, 6);
+        System.out.println(map);
+    }
+    //查询所有记录，将其封装为list集合
+    public static void test06() {
+        String sql = "select * from product;";
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+        System.out.println(list);
+    }
+    //查询所有记录，将其封装为product对象的list集合
+    //query使用RowMapper做映射返回对象
+    public static void test07() {
+        String sql = "select * from product;";
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        List<Product> query = jdbcTemplate.query(sql, new RowMapper<Product>() {
+            @Override
+            public Product mapRow(ResultSet rs, int i) throws SQLException {
+                Product p = new Product();
+                p.setPid(rs.getInt("pid"));
+                p.setName(rs.getString("name"));
+                p.setPrice(rs.getDouble("price"));
+
+                return p;
+
+
+            }
+        });
+        for (Product product : query) {
+            System.out.println(product);
+        }
+    }
+    //query使用BeanPropertyRowMapper做映射返回对象
+    public static void test08() {
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        String sql = "select * from product";
+        List<Product> query = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Product.class));
+        for (Product product : query) {
+            System.out.println(product);
+        }
+    }
+    //查询总记录数
+    public static void test09(){
+        String sql = "select count(pid) from product;";
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+        Long num = jdbcTemplate.queryForObject(sql, long.class);
+        System.out.println(num);
+    }
+}
+
+
+public class Product {
+    private Integer pid;
+    private String name;
+    private Double price;
+
+    public Integer getPid() {
+        return pid;
+    }
+
+    public void setPid(Integer pid) {
+        this.pid = pid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "pid=" + pid +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                '}';
+    }
+}
