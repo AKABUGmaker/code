@@ -1,0 +1,30 @@
+public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.println("请输入字符串：");
+        String s = sc.next();
+        char[] cs = s.toCharArray();
+        HashSet<Character> set = new HashSet<>();
+        for (int i = 0; i < cs.length; i++) {
+            set.add(cs[i]);
+        }
+        //System.out.println(set);
+        HashMap<Character, Integer> map = new HashMap<>();
+        for (Character c : set) {
+            map.put(c, null);
+        }
+        //System.out.println(map);
+
+        for (Character c : set) {
+            int count = 0;
+            for (int i = 0; i < cs.length; i++) {
+                if (c == cs[i]) {
+                    count++;
+                    map.put(c, count);
+                }
+            }
+        }
+        for (Character c : set) {
+            System.out.print(c+"("+map.get(c)+")");
+        }
+
+    }
