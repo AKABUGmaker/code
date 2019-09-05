@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<script>
+    /*
+     * 1. 给表单添加提交事件；
+     * 2. 对用户名和密码进行非空校验；
+     * 3. 校验不通过：在对应输入框后面显示错误提示信息；
+     * 4. 校验通过：在对应的输入框后面显示"√"；
+     * 5. 所有校验均通过后表单成功提交；
+     */
+    window.onload = function (ev) {
+        // document.getElementById("registForm").onsubmit = function (ev1) {
+        //     var flag = true;
+        //     var username = document.getElementById("username");
+        //     var password = document.getElementById("password");
+        //     if (username.value == "") {
+        //         var us = document.getElementById("username_msg");
+        //         us.innerHTML = "请输入用户名";
+        //         flag = false;
+        //     }else {
+        //         var us = document.getElementById("username_msg");
+        //         us.innerHTML = "对号";
+        //     }
+        //     if (password.value == "") {
+        //         var ps = document.getElementById("password_msg");
+        //         ps.innerHTML = "请输入用户名";
+        //         flag = false;
+        //     }else {
+        //         var ps = document.getElementById("password_msg");
+        //         ps.innerHTML = "对号";
+        //     }
+        //     return flag;
+        // }
+        function checkUserName() {
+            //判断用户名的value值
+            var userName = document.getElementById("username").value;
+            //userName == ""   -- false
+            //没有输入的情况
+            if (!userName) {
+                //给出提示信息
+                document.getElementById("username_msg").innerHTML = "<font color='red'>请输入用户名！</font>";
+                return false;
+            } else {
+                document.getElementById("username_msg").innerHTML = "<font color='green'>√</font>";
+                return true;
+            }
+        };
+        function checkPassWord() {
+            //判断用户名的value值
+            var password = document.getElementById("password").value;
+            //userName == ""   -- false
+            //没有输入的情况
+            if (!password) {
+                //给出提示信息
+                document.getElementById("password_msg").innerHTML = "<font color='red'>请输入用户名！</font>";
+                return false;
+            } else {
+                document.getElementById("password_msg").innerHTML = "<font color='green'>√</font>";
+                return true;
+            }
+        };
+        document.getElementById("registForm").onsubmit = function (ev1) {
+            var us = checkUserName();
+            var pw = checkPassWord();
+            return us && pw;
+        }
+    }
+
+</script>
+<body>
+<h2 align="center">注册表单校验</h2>
+<form action="#" method="get" id="registForm">
+    <table width="40%" height="60%" align="center" bgcolor="#ffffff" align="center">
+        <tr>
+            <td colspan="3">会员注册USER REGISTER</td>
+        </tr>
+        <tr>
+            <td width="20%">用户名:</td>
+            <td width="40%"><input type="text" onblur="checkUserName();" name="username" id="username"></td>
+            <td width="40%"><span id="username_msg"></span></td>
+        </tr>
+        <tr>
+            <td>密码:</td>
+            <td><input type="password" onblur="checkPwd();" name="password" id="password"></td>
+            <td><span id="password_msg"></span></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <input type="submit" value="注册"/>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>
