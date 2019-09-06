@@ -1,0 +1,45 @@
+案例1-弹出广告
+<script>
+			$(function () {
+				var interval = setInterval(guangGao,6000);
+				var count = 0;
+				function guangGao() {
+				    count++;
+					if(count > 3){
+					    clearInterval(interval);
+					    return;
+					}
+                    $("#ad").show();
+                    setTimeout(xiaoShi,2000)
+                }
+                function xiaoShi() {
+					$("#ad").hide()
+                }
+            })
+            // $(function () {
+            //     setTimeout(adshow,3000);
+            //     setTimeout(adHide,8000);
+            // });
+            // function adshow() {
+            //     $("#ad").show("slow");
+            // }
+            // function adHide() {
+            //     $("#ad").hide("slow");
+            // }
+		</script>
+案例2-隔行换色
+<script>
+			$(function(){
+			    $("tr:gt(0):even").css("backgroundColor","#FFFFCC");
+			    $("tr:gt(0):odd").css("backgroundColor","#BCD68D");
+			})
+		</script>
+案例3-全选全不选
+<script type="text/javascript">
+    $(function () {
+        $("#selectAll").click(function () {
+            //alert(this.checked)
+            $(".itemSelect").prop("checked",this.checked)
+        })
+    });
+</script>
