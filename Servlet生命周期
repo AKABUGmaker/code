@@ -1,0 +1,31 @@
+import javax.servlet.*;
+import javax.servlet.annotation.WebServlet;
+import java.io.IOException;
+@WebServlet("/lifecycle")
+public class LifeCycleServlet implements Servlet {
+    @Override
+    public void init(ServletConfig servletConfig) throws ServletException {
+        System.out.println("LifeCycleServlet init method invoked");
+    }
+
+    @Override
+    public ServletConfig getServletConfig() {
+        return null;
+    }
+
+    @Override
+    public void service(ServletRequest servletRequest, ServletResponse servletResponse) throws ServletException, IOException {
+        System.out.println("Hello LifeCycleServlet");
+    }
+
+    @Override
+    public String getServletInfo() {
+        return null;
+    }
+
+    @Override
+    public void destroy() {
+        System.out.println("LifeCycleServlet destroy method invoked");
+    }
+}
+执行TomCat时我们可以看到，在执行时Servlet只创建了一次，所以Servlet只创建一次，在结束时由TomCat销毁，并且线程不安全
