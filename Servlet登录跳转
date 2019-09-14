@@ -1,0 +1,49 @@
+package day02Demo.AnLi;
+
+
+
+
+import org.apache.commons.beanutils.BeanUtils;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+
+@WebServlet("/login")
+public class LoginServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("utf-8");
+//        String username = request.getParameter("username");
+//        String password = request.getParameter("password");
+
+
+        User loginUser = new User();
+//        loginUser.setUsername(request.getParameter("username"));
+//        loginUser.setPassword(request.getParameter("password"));
+        Map<String, String[]> map = request.getParameterMap();
+        try {
+            BeanUtils.populate(loginUser,map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        if ("itcast".equals(loginUser.getUsername()) && ("heima".equals(loginUser.getPassword()))) {
+            request.getRequestDispatcher("/sucess").forward(request,response);
+        }else {
+            request.getRequestDispatcher("/fail").forward(request,response);
+        }
+
+
+
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request, response);
+    }
+}
