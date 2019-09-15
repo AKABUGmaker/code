@@ -1,0 +1,33 @@
+public class TotalAnLiServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //设置编码和解码的字符集
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf-8");
+        //获得上下域对象
+        ServletContext context = getServletContext();
+        //获取上下域中的count对象,第一次访问时,没有存入所以是null
+        //需要将计数器强转为integer对象
+        Integer count = (Integer) context.getAttribute("count");
+        //当count对象是null时,判断等于0
+        if(count==null){
+            count=0;
+        }
+        //创建计数器
+        count++;
+        //将计数器放入上下域对象中
+        context.setAttribute("count",count);
+        //编写网页
+        PrintWriter writer = response.getWriter();
+        writer.println("<html>");
+        writer.println("<head>");
+        writer.println("</head>");
+        writer.println("</body>");
+        writer.println("访问网页的次数为:"+count+"次");
+        writer.println("</body>");
+        writer.println("</html>");
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request, response);
+    }
+}
