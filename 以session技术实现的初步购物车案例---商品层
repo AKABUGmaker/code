@@ -1,0 +1,31 @@
+public class AddToCarServlet extends HttpServlet {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //设置字符集
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf-8");
+        //创建输出流
+        PrintWriter out = response.getWriter();
+        //接收数据,获取商品数组
+        String[] goods = request.getParameterValues("good");
+
+        //处理数据
+        //获得Session作用域
+        HttpSession session = request.getSession();
+        //根据设置的值获取作用域中的商品集合
+        List<String> car = (List<String>) session.getAttribute("car");
+        //判断如果为空,创建集合
+        if(car==null){
+            car = new ArrayList<String>();
+        }
+        //将选中的商品数组添加到集合中
+        car.addAll(Arrays.asList(goods));
+        //将集合添加到作用域中
+        session.setAttribute("car",car);
+        //输出流打印已添加
+        out.println("<h1>您的商品已经添加到购物车中</h1>");
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request, response);
+    }
+}
