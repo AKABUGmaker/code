@@ -1,0 +1,50 @@
+public class ContactServlet extends HttpServlet {
+    private Dao dao = new Dao();
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf-8");
+        PrintWriter out = response.getWriter();
+        List<Contact> contacts = dao.queryAll();
+
+        out.write("<!DOCTYPE html>");
+        out.write("<html lang=\"en\">");
+        out.write("<head>");
+        out.write("    <meta charset=\"UTF-8\">");
+        out.write("    <title>Title</title>");
+        out.write("</head>");
+        out.write("<body>");
+        out.write("");
+        out.write("<table>");
+        out.write("    <tr>");
+        out.write("        <th>编号</th>");
+        out.write("        <th>姓名</th>");
+        out.write("        <th>性别</th>");
+        out.write("        <th>年龄</th>");
+        out.write("        <th>籍贯</th>");
+        out.write("        <th>手机</th>");
+        out.write("        <th>邮箱</th>");
+        out.write("    </tr>");
+
+        for (Contact contact : contacts) {
+            out.write("    <tr>");
+            out.write("        <td>" + contact.getId() + "</td>");
+            out.write("        <td>" + contact.getName() + "</td>");
+            out.write("        <td>" + (contact.getGender().equals("m")?"男":"女") + "</td>");
+            out.write("        <td>" + contact.getBirthday() + "</td>");
+            out.write("        <td>" + contact.getBirthplace() + "</td>");
+            out.write("        <td>" + contact.getMobile() + "</td>");
+            out.write("        <td>" + contact.getEmail() + "</td>");
+            out.write("    </tr>");
+        }
+
+        out.write("</table>");
+        out.write("");
+        out.write("</body>");
+        out.write("</html>");
+
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request, response);
+    }
+}
