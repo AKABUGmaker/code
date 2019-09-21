@@ -1,0 +1,71 @@
+public class ContactDaoImpl implements ContactDao {
+    private JdbcTemplate jdbcTemplate = new JdbcTemplate(DruidUtils.getDataSource());
+
+    @Override
+    public List<Contact> queryAll() {
+        String sql = "select * from contact_info where del = 0";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Contact.class));
+    }
+
+    @Override
+    public int del(String id) {
+        String sql = "update contact_info set del = 1 where id = ?";
+        return jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public int insert(Contact contact) {
+        String sql = "insert into contact_info(name,gender,birthday,birthplace,mobile,email) values (?,?,?,?,?,?) ";
+        return jdbcTemplate.update(sql,
+                contact.getName(),
+                contact.getGender(),
+                contact.getBirthday(),
+                contact.getBirthplace(),
+                contact.getMobile(),
+                contact.getEmail());
+    }
+
+    @Override
+    public List<Contact> queryAll(int up, int down) {
+        String sql = "select * from contact_info where del = 0 limit ?,?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Contact.class), up, down);
+    }
+
+    @Override
+    public int queryCount() {
+        String sql = "select count(*) from contact_info where del = 0";
+        return jdbcTemplate.queryForObject(sql, Integer.class);
+    }
+
+    @Override
+    public List<Contact> query(String id) {
+        String sql = "select * from contact_info where id = ? and del = 0";
+        return jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(Contact.class),id);
+    }
+
+    @Override
+    public int updateContact(Contact contact) {
+        String sql = "update contact_info set " +
+                "name=?," +
+                "gender=?," +
+                "birthday=?," +
+                "birthplace=?," +
+                "mobile=?," +
+                "email=?" +
+                "where del=0 " +
+                "and id=?";
+        return jdbcTemplate.update(sql,contact.getName(),
+                contact.getGender(),
+                contact.getBirthday(),
+                contact.getBirthplace(),
+                contact.getMobile(),
+                contact.getEmail(),
+                contact.getId());
+    }
+
+    @Override
+    public List<Contact> queryByEmail(String email) {
+        String sql = "select * from contact_info where del=0 and email=?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Contact.class),email);
+    }
+}
