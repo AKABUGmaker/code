@@ -1,0 +1,72 @@
+public class ContactRedisDao implements ContactDao {
+
+    @Override
+    public List<Contact> queryAll() {
+        Jedis jedis = JedisUtil.getJedis();
+        //因为返回值是list,所以用lrange方法
+        List<String> contacts = jedis.lrange("contacts", 0, -1);
+
+        //contacts是json格式的String类型
+        //将string类型转为contact类型
+
+        List<Contact> result = new ArrayList<>();
+
+        for (String contact : contacts) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            try {
+                mapper.readValue(contact,Contact.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        jedis.close();
+        return result;
+    }
+
+    @Override
+    public int del(String id) {
+        return 0;
+    }
+
+    @Override
+    public int insert(Contact contact) {
+        Jedis jedis = JedisUtil.getJedis();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            jedis.rpush("contacts",mapper.writeValueAsString(contact));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        jedis.close();
+        return 1;
+    }
+
+    @Override
+    public List<Contact> queryAll(int up, int down) {
+        return null;
+    }
+
+    @Override
+    public int queryCount() {
+        return 0;
+    }
+
+    @Override
+    public List<Contact> query(String id) {
+        return null;
+    }
+
+    @Override
+    public int updateContact(Contact contact) {
+        return 0;
+    }
+
+    @Override
+    public List<Contact> queryByEmail(String email) {
+        return null;
+    }
+}
