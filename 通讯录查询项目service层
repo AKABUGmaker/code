@@ -1,0 +1,66 @@
+public class ContactServiceImpl implements ContactService {
+    ContactDaoImpl dao = new ContactDaoImpl();
+    ContactRedisDao redisDao = new ContactRedisDao();
+
+    @Override
+    public List<Contact> queryAll() {
+        //查询redis中的数据
+        List<Contact> contacts = redisDao.queryAll();
+        //如果有数据的话直接返回
+        if (contacts.size() != 0) {
+            return contacts;
+        } else {
+            //没有数据从数据库dao中查询
+            //查完后将数据存入到redis中
+             contacts = dao.queryAll();
+
+            for (Contact c : contacts) {
+                redisDao.insert(c);
+            }
+        }
+        return contacts;
+
+        //return dao.queryAll();
+    }
+
+    @Override
+    public boolean del(String id) {
+        return dao.del(id) == 1;
+    }
+
+    @Override
+    public boolean insert(Contact contact) {
+        return dao.insert(contact) == 1;
+    }
+
+    @Override
+    public List<Contact> queryAll(int up, int down) {
+        return dao.queryAll(up, down);
+    }
+
+    @Override
+    public int queryCount() {
+        return dao.queryCount();
+    }
+
+    @Override
+    public Contact query(String id) {
+        List<Contact> query = dao.query(id);
+        if (query == null) {
+            return null;
+        } else {
+            return query.get(0);
+        }
+    }
+
+    @Override
+    public boolean update(Contact contact) {
+        return dao.updateContact(contact) == 1;
+    }
+
+    @Override
+    public boolean queryByEmail(String email) {
+        List<Contact> contacts = dao.queryByEmail(email);
+        return contacts.size() > 0;
+    }
+}
