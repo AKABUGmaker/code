@@ -1,0 +1,47 @@
+public class ContactQueryServlet2 extends HttpServlet {
+    ContactServiceImpl contactService = new ContactServiceImpl();
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf-8");
+        //设定初始页数
+        int up = 1;
+        //获得选中第几页
+        String page = request.getParameter("page");
+        //判断选中的是不是空,如果为空用up的默认值
+        if (page != null) {
+            up = Integer.parseInt(page);
+        }
+
+
+        //设定初始行数
+        int down = 10;
+        //获得选中的行数
+        String downSize = request.getParameter("down");
+        //判断选中的是不是空,如果为空用down的默认值
+        if (downSize != null) {
+            down = Integer.parseInt(downSize);
+        }
+
+
+        //获取选中访问的第几页
+        int realUp = (up - 1) * down;
+
+        //获取一共多少条记录
+        int count = contactService.queryCount();
+
+        //计算共有多少页
+        int pageCount = (int) Math.ceil(count / (double) down);
+
+        List<Contact> contacts = contactService.queryAll(realUp, down);
+        request.setAttribute("contacts", contacts);
+        request.setAttribute("pageCount", pageCount);
+        request.setAttribute("down", down);
+        request.setAttribute("up",up);
+        request.getRequestDispatcher("list.jsp").forward(request, response);
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request, response);
+    }
+}
