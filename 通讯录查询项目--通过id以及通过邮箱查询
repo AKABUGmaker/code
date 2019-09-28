@@ -1,0 +1,62 @@
+通过id查询:
+
+```
+public class QueryByIdServlet extends HttpServlet {
+    ContactServiceImpl contactService = new ContactServiceImpl();
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("text/html;charset=utf-8");
+
+
+        //通过id查询指定对象
+        String id = request.getParameter("id");
+        //通过传过来的id参数获得要查找的对象
+        Contact contact = contactService.query(id);
+        //将contact放入请求域中
+        request.setAttribute("contact",contact);
+        //因为要发送查找后的资源,用重定向技术发送
+        request.getRequestDispatcher("update.jsp").forward(request,response);
+
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request, response);
+    }
+}
+```
+
+通过邮箱查询
+
+```
+public class QueryEmailServlet extends HttpServlet {
+    ContactServiceImpl contactService = new ContactServiceImpl();
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("application/json;charset=utf-8");
+        String email = request.getParameter("email");
+        boolean exist = contactService.queryByEmail(email);
+        PrintWriter out = response.getWriter();
+        Map<String,Object> responseObj = new HashMap<>();
+
+        if(exist){
+            //存在
+            responseObj.put("code",1);
+            responseObj.put("error","此邮箱已经存在!");
+        }else {
+            //不存在
+            responseObj.put("code",0);
+            responseObj.put("error","此邮箱不存在,可以注册");
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        String s = mapper.writeValueAsString(responseObj);
+        out.write(s);
+
+
+    }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        this.doPost(request, response);
+    }
+}
+```
