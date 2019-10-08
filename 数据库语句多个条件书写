@@ -1,0 +1,20 @@
+public int queryRecordCount(String word, String cid) {
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("select count(*) from tab_route where rflag = 1");
+
+
+        List<Object> parameters = new ArrayList<>();
+        //判断cid是否发过来,发过来就将其放入sql语句中
+        if (cid != null && !cid.equals("")) {
+            sql.append(" and cid=?");
+            parameters.add(cid);
+        }
+        //判断word
+        if (word != null && !word.equals("")) {
+            sql.append(" and rname like ?");
+            parameters.add("%" + word + "%");//'%?%',用jdbc不需要单引号
+        }
+        //String sql = "select count(*) from tab_route where rflag = 1 and cid = ?;";
+        return jdbcTemplate.queryForObject(sql.toString(), int.class, parameters.toArray());
+    }
