@@ -1,0 +1,150 @@
+public class UserServlet extends ActionServlet {
+    UserServiceImpl userService = new UserServiceImpl();
+
+    protected void active(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("active");
+    }
+
+    protected void checkEmail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //System.out.println("checkEmail");
+        //jqery-validation需要的是字符串
+        response.setContentType("text/plain;charset=utf-8");
+        //判断邮箱是否存在
+        //从前端获得用户输入的邮箱
+        String email = request.getParameter("email");
+        //用service判断该邮箱是否存在
+        Boolean existsEmail = userService.existsEmail(email);
+        //存在返回false,不存在返回true(字符串)
+        //service层返回的是true或false的boolean类型
+        //运用StringBuilder将boolean类型转换为字符串形式
+        //创建一个空字符串,作用是调用方法是清空字符串
+        String s = "";
+        //创建Stringbuilder类型
+        StringBuilder builder = new StringBuilder(s);
+        //将返回的boolean类型转换为字符串
+        StringBuilder append = builder.append(existsEmail);
+        //重新换回字符串
+        String exist = append.toString();
+        //写入判断的结果
+        response.getWriter().write(exist);
+
+    }
+
+    protected void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json;charset=utf-8");
+        //以map集合获取请求域数据
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        //获得email和captcha验证码并判断
+        String email = request.getParameter("email");
+        String captcha = request.getParameter("captcha");
+        Map<String, Object> result = new HashMap<String, Object>();
+        //返回true代表邮箱不存在所以用!
+        if (!userService.existsEmail(email)) {
+            result.put("code", 1);
+            result.put("msg", "邮箱已存在");
+        } else if (!userService.tfCaptcha(request, captcha)) {
+            result.put("code", 2);
+            result.put("msg", "验证码错误");
+        } else {
+            userService.insert(parameterMap);
+            result.put("code", 0);
+            result.put("msg", "operation success");
+        }
+        //销毁验证码(不论注册成功还是失败)
+        HttpSession session = request.getSession();
+        session.removeAttribute("captcha");
+        //通过json处理注册参数
+        ObjectMapper mapper = new ObjectMapper();
+        //将判断的结果返回给前端处理
+        String value = mapper.writeValueAsString(result);
+
+        response.getWriter().write(value);
+
+
+    }
+
+    protected void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json;charset=utf-8");
+
+        //获取用户登录输入的数据
+        String email = request.getParameter("email");
+        String captcha = request.getParameter("captcha");
+        String password = request.getParameter("password");
+
+        //创建提交给前端的map集合
+        Map<String, Object> result = new HashMap<>();
+
+        //创建通过用户输入的邮箱和密码查询得到的user
+        User user = userService.queryByEmailAndPassword(email, password);
+        //判断数据
+        //1 验证码是否正确
+        //2 邮箱或者密码是否正确
+        //3 状态是否激活
+
+
+        if (!userService.tfCaptcha(request, captcha)) {
+            result.put("code", 1);
+            result.put("msg", "验证码错误");
+        } else if (user == null) {
+            result.put("code", 2);
+            result.put("msg", "邮箱或密码错误");
+        } else if (!userService.whatActive(user)) {
+            result.put("code", 3);
+            result.put("msg", "邮箱尚未激活");
+        } else {
+            result.put("code", 0);
+            result.put("msg", "operation success");
+            request.getSession().setAttribute("user", user);
+        }
+
+        //销毁验证码(不论注册成功还是失败)
+        HttpSession session = request.getSession();
+        session.removeAttribute("captcha");
+        //通过json处理注册参数
+        ObjectMapper mapper = new ObjectMapper();
+        //将判断的结果返回给前端处理
+        String value = mapper.writeValueAsString(result);
+
+        response.getWriter().write(value);
+
+    }
+
+    //判断登录状态
+    protected void loginOrNot(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        response.setContentType("application/json;charset=utf-8");
+        //通过传递的user获取当前用户
+        Object user = request.getSession().getAttribute("user");
+        //获取传递的map集合
+        Map<String, Object> result = new HashMap<>();
+        if (user == null) {
+            //不存在,未登录
+            result.put("code", 1);
+            result.put("msg", "用户未登录");
+        } else {
+            result.put("code", 0);
+            result.put("msg", "operation success");
+            result.put("user", user);
+        }
+
+        //销毁验证码(不论注册成功还是失败)
+        HttpSession session = request.getSession();
+        session.removeAttribute("captcha");
+        //通过json处理注册参数
+        ObjectMapper mapper = new ObjectMapper();
+        //将判断的结果返回给前端处理
+        String value = mapper.writeValueAsString(result);
+
+        response.getWriter().write(value);
+    }
+
+    //退出功能
+    protected void exit(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //退出功能实现原理:
+        //1 将请求域中的用户数据删除
+        request.getSession().removeAttribute("user");
+        //2 跳转到登录页面
+        response.sendRedirect("login.html");
+    }
+
+}
