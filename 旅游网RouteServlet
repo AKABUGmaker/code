@@ -1,0 +1,113 @@
+public class RouteServlet extends ActionServlet {
+    private RouteServiceImpl routeService = new RouteServiceImpl();
+
+    //精选路线传递到前端的方法
+    protected void handPick(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json;charset=utf-8");
+        //将获取的数据路线用json形式传递到前端
+        //新建一个map集合
+        Map<String, Object> result = new HashMap<>();
+        //传递过去的map集合中必须有"code"和"msg"
+        //将code和msg以及查询得到的路线信息封装进去
+        result.put("code", 0);
+        result.put("msg", "operation success");
+        Map<String, Object> queryHandpick = routeService.queryHandpick();
+        result.put("handPick", queryHandpick);
+        //再将map集合转换为json字符串
+        ObjectMapper mapper = new ObjectMapper();
+        //通过响应发送到前端
+        String s = mapper.writeValueAsString(result);
+        response.getWriter().write(s);
+    }
+
+    protected void queryPage(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        //以json形式发送给前端
+        request.setCharacterEncoding("utf-8");
+        response.setContentType("application/json;charset=utf-8");
+
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 0);
+        result.put("msg", "operation success");
+        RoutePageBean routePageBean = new RoutePageBean();
+
+        //处理当前页面
+        String currentPage = request.getParameter("currentPage");
+        if (currentPage != null && currentPage != "") {
+            routePageBean.setCurrentPage(Integer.parseInt(currentPage));
+        }
+        //前端发送的参数:word,cid
+        String cid = request.getParameter("cid");
+        String word = request.getParameter("word");
+
+        if (word.equals("null")){
+            word = "";
+        }
+
+        word = URLDecoder.decode(word, "utf-8");
+
+        routeService.queryPage(word, cid, routePageBean);
+        result.put("routePageBean", routePageBean);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String s = mapper.writeValueAsString(result);
+        response.getWriter().write(s);
+    }
+
+
+    //路线详细信息查询方法
+    protected void detail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        response.setContentType("application/json;charset=utf-8");
+        String rid = request.getParameter("rid");
+
+        Map<String, Object> queryDetail = routeService.queryDetail(rid);
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 0);
+        result.put("msg", "operation success");
+        result.put("detail", queryDetail);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String s = mapper.writeValueAsString(result);
+        response.getWriter().write(s);
+
+    }
+
+    //判断登录状态方法
+    protected void queryFavoriteStatus(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json;charset=utf-8");
+
+        String rid = request.getParameter("rid");
+
+        boolean favorite = routeService.isFavorite(request, rid);
+
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 0);
+        result.put("msg", "operation success");
+        result.put("isFavorited", favorite);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String s = mapper.writeValueAsString(result);
+        response.getWriter().write(s);
+    }
+
+    //添加收藏方法
+    protected void favorite(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json;charset=utf-8");
+
+        String rid = request.getParameter("rid");
+
+        routeService.favorite(request, rid);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 0);
+        result.put("msg", "operation success");
+
+        ObjectMapper mapper = new ObjectMapper();
+        String s = mapper.writeValueAsString(result);
+        response.getWriter().write(s);
+    }
+
+
+}
