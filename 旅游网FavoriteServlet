@@ -1,0 +1,57 @@
+public class FavoriteServlet extends ActionServlet {
+    private FavoriteService favoriteService = new FavoriteServiceImpl();
+    protected void myFavorite(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        response.setContentType("application/json;charset=utf-8");
+
+        RoutePageBean routePageBean = new RoutePageBean();
+        //设置一页大小
+        routePageBean.setPageSize(12);
+
+        String currentPage = request.getParameter("currentPage");
+        if(currentPage != null && !currentPage.equals("")){
+            routePageBean.setCurrentPage(Integer.parseInt(currentPage));
+        }
+
+        favoriteService.queryRouteByUid(request,routePageBean);
+
+        Map<String,Object> result = new HashMap<>();
+
+        result.put("code",0);
+        result.put("msg","operation success");
+        result.put("routePageBean",routePageBean);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String s = mapper.writeValueAsString(result);
+        response.getWriter().write(s);
+
+
+    }
+
+    protected void rank(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json;charset=utf-8");
+
+        RoutePageBean routePageBean = new RoutePageBean();
+
+        String currentPage = request.getParameter("currentPage");
+        if (currentPage != null && !currentPage.equals("")) {
+            routePageBean.setCurrentPage(Integer.parseInt(currentPage));
+        }
+
+//        favoriteService.queryRank(routePageBean);
+        String word = request.getParameter("word");
+        String priceBegin = request.getParameter("priceBegin");
+        String priceEnd = request.getParameter("priceEnd");
+        favoriteService.queryRank(word,priceBegin,priceEnd,routePageBean);
+        Map<String,Object> result = new HashMap<>();
+        result.put("code",0);
+        result.put("msg","operation success");
+        result.put("routePageBean",routePageBean);
+
+        ObjectMapper mapper = new ObjectMapper();
+        String s = mapper.writeValueAsString(result);
+        response.getWriter().write(s);
+    }
+
+
+}
