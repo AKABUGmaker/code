@@ -1,0 +1,86 @@
+public class UserServiceImpl implements UserService {
+    UserDaoImpl dao = new UserDaoImpl();
+
+    @Override
+    public Boolean existsEmail(String email) {
+        List<User> quaryByEmail = dao.quaryByEmail(email);
+        //email存在返回false,不存在返回true
+        return !(quaryByEmail.size() == 1);
+    }
+
+    @Override
+    public Boolean tfCaptcha(HttpServletRequest request, String captcha) {
+        //获取用户输入的验证码
+        //先获取session,然后从session中获取
+        HttpSession session = request.getSession();
+        String sessionCaptcha = (String) session.getAttribute("captcha");
+        //判断用户输入的与生成的是否相等(忽略大小写)
+        return captcha.equalsIgnoreCase(sessionCaptcha);
+        //正确返回true,错误返回false
+    }
+
+    @Override
+    public Boolean insert(Map<String, String[]> parameterMap) {
+        //创建用户类
+        User user = new User();
+        //将提交的map数据插入到用户类中
+        try {
+            BeanUtils.populate(user, parameterMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //运用createInsertCode方法插入校验码
+        createInsertCode(user);
+        //插入数据成功后可以发送邮件
+        //编写邮件
+        //邮件内容
+        //在邮件中添加用户的校验码来区分邮件
+        StringBuilder builder = new StringBuilder();
+        builder.append("<h1>注册成功,请前往以下链接激活邮箱</h1>");
+        builder.append("<a href=\"http://localhost:8080/heimaTravel_war_exploded/user?action=active");
+        builder.append("&code=");
+        builder.append(user.getCode());
+        builder.append("\">http://localhost:8080/heimaTravel_war_exploded/user?action=active");
+        builder.append("&code=");
+        builder.append(user.getCode());
+        builder.append("</a>");
+        String emailString = builder.toString();
+        //发送邮件
+        try {
+            MailUtil.sendEmail(user.getEmail(), user.getRealname(), emailString);
+        } catch (EmailException e) {
+            e.printStackTrace();
+        }
+        //返回数据插入是否正确
+        return dao.insertUser(user) == 1;
+    }
+
+    //创造一个生成校验码并交给用户数据的特有方法
+    //以供插入方法使用
+    private void createInsertCode(User user) {
+        user.setCode(UUIDUtil.getUuid());
+    }
+
+
+    @Override
+    public User queryByEmailAndPassword(String email, String password) {
+        //数据库查询语句返回的是一个集合
+        //判断集合长度是否为1
+        //为1返回第0索引
+        //不为1返回空
+        List<User> users = dao.queryByEmailAndPassword(email, password);
+        if(users.size()==1){
+            return users.get(0);
+        }else {
+            return null;
+        }
+    }
+
+    @Override
+    public Boolean whatActive(User user) {
+        //根据user参数判断status是否为1
+        //为1代表已激活(返回true)
+        return user.getStatus() == 1;
+    }
+
+}
