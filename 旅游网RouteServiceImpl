@@ -1,0 +1,85 @@
+public class RouteServiceImpl implements RouteService {
+    RouteDaoImpl dao = new RouteDaoImpl();
+    SellerDaoImpl sellerDao = new SellerDaoImpl();
+    RouteImgDaoImpl routeImgDao = new RouteImgDaoImpl();
+    CategoryDaoImpl categoryDao = new CategoryDaoImpl();
+    @Override
+    public Map<String, Object> queryHandpick() {
+        //人气旅游
+        List<Route> queryLikes = dao.queryLikes();
+        //最新旅游
+        List<Route> queryDate = dao.queryDate();
+        //主题旅游
+        List<Route> queryTheme = dao.queryTheme();
+        //将查询到的集合封装到map中
+        Map<String,Object> map = new HashMap<>();
+        map.put("Likes",queryLikes);
+        map.put("Date",queryDate);
+        map.put("Theme",queryTheme);
+        return map;
+    }
+
+    @Override
+    public void queryPage(String word,String cid,RoutePageBean routePageBean) {
+        /**
+         * 首先获得当前是第几页(currentPage)
+         * 然后获得一页几条数据(pageSize)
+         * 通过第几页和一页几条数据获得limit的第一个参数从第几条数据开始(pageOffset)
+         * 当前页(currentPage)需要先-1;
+         * */
+        int pageOffset = (routePageBean.getCurrentPage()-1) * routePageBean.getPageSize();
+        //将获得的pageOffset放入javaBean中
+        routePageBean.setPageOffset(pageOffset);
+        //将javaBean传入dao方法中,查询当前页应该获得的路线数据
+        List<Route> routes = dao.queryPage(word,cid,pageOffset, routePageBean.getPageSize());
+
+
+        //通过dao层方法获得有多少条数据
+        int recordCount = dao.queryRecordCount(word,cid);
+        //通过数据条数和一页有多少条数据获得总页数
+        int pageCount = (int)Math.ceil(recordCount / (double)routePageBean.getPageSize());
+        //将两个数放入javaBean中
+        routePageBean.setRecordCount(recordCount);
+        routePageBean.setPageCount(pageCount);
+
+
+
+
+        //将查询得到的数据传给javaBean里的路线集合
+        routePageBean.setRoutes(routes);
+
+    }
+
+    @Override
+    public Map<String, Object> queryDetail(String rid) {
+        Route route = dao.queryById(rid);
+        //线路中有对应的商家id(sid),可通过商家id查询商家信息
+        //路线类中的sid属性是int类型,将其转换为String类型
+        Seller seller = sellerDao.queryById(route.getSid());
+        List<RouteImg> routeImgs = routeImgDao.queryByRid(rid);
+        Category category = categoryDao.queryById(route.getCid());
+
+        Map<String,Object> result = new HashMap<>();
+        result.put("route",route);
+        result.put("seller",seller);
+        result.put("routeImgs",routeImgs);
+        result.put("category",category);
+
+        return result;
+
+    }
+
+    @Override
+    public boolean isFavorite(HttpServletRequest request, String rid) {
+        User user = (User) request.getSession().getAttribute("user");
+        Favorite favorite = dao.queryFavorite(user.getUid(), rid);
+        return favorite != null;
+    }
+
+    @Override
+    public boolean favorite(HttpServletRequest request, String rid) {
+        User user = (User) request.getSession().getAttribute("user");
+        int favorite = dao.favorite(user.getUid(), rid);
+        return favorite == 2;
+    }
+}
