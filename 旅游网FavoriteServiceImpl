@@ -1,0 +1,44 @@
+public class FavoriteServiceImpl implements FavoriteService {
+    private FavoriteDao dao = new FavoriteDaoImpl();
+    private RouteDao routeDao = new RouteDaoImpl();
+    @Override
+    /**
+     * 因为传入的参数也是分页类,所以直接路线传入分页类中即可,不需要返回值
+     */
+    public void queryRouteByUid(HttpServletRequest request, RoutePageBean routePageBean) {
+        //获取当前登录用户
+        User user = (User) request.getSession().getAttribute("user");
+        //根据数据库查询方法,获得用户收藏了几条路线
+        int recordCount = dao.queryRouteByUidCount(user.getUid());
+        //通过总路线数和一页有几条路线获取总页数
+        int pageCount = (int) Math.ceil(recordCount / (double) routePageBean.getPageSize());
+        //通过当前是第几页和一页的大小获取limit的第一个参数
+        int pageOffset = (routePageBean.getCurrentPage() - 1) * routePageBean.getPageSize();
+
+        //将三个属性添加到分页路线类中
+        routePageBean.setRecordCount(recordCount);
+        routePageBean.setPageCount(pageCount);
+        routePageBean.setPageOffset(pageOffset);
+
+        //通过数据库方法获取分页记录
+        List<Route> routes = dao.queryRouteByUid(user.getUid(), pageOffset, routePageBean.getPageSize());
+        routePageBean.setRoutes(routes);
+    }
+
+    @Override
+    public void queryRank(String word,String priceBegin,String priceEnd,RoutePageBean pageBean) {
+
+        //该方法的两个参数为搜索字和分类,
+        //这里用不到两个参数,所以设置为null
+        int recordCount = dao.queryRecordCount(word,priceBegin,priceEnd);
+        int pageCount = (int)Math.ceil(recordCount / (double) pageBean.getPageSize());
+        int pageOffset = (pageBean.getCurrentPage() - 1) * pageBean.getPageSize();
+
+        pageBean.setRecordCount(recordCount);
+        pageBean.setPageCount(pageCount);
+        pageBean.setPageOffset(pageOffset);
+
+        List<Route> routes = dao.queryRankPage(word,priceBegin,priceEnd,pageOffset,pageBean.getPageSize());
+        pageBean.setRoutes(routes);
+    }
+}
