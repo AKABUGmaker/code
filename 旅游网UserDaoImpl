@@ -1,0 +1,36 @@
+public class UserDaoImpl implements UserDao {
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(C3P0Util.getDataSource());
+    @Override
+    //通过email判断该用户是否存在
+    public List<User> quaryByEmail(String email) {
+        String sql = "select * from tab_user where email = ?";
+        return jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(User.class),email);
+    }
+
+    @Override
+    //插入用户数据
+    public int insertUser(User user) {
+        String sql = "insert into tab_user(username,password,realname,birthday,gender,mobile,email,code) values (?,?,?,?,?,?,?,?)";
+        return jdbcTemplate.update(sql, user.getUsername(),
+                user.getPassword(),
+                user.getRealname(),
+                user.getBirthday(),
+                user.getGender(),
+                user.getMobile(),
+                user.getEmail(),
+                user.getCode());
+    }
+
+    /**
+     * 通过email和password查询用户
+     * 用于登录
+     * @param email
+     * @param password
+     * @return 返回查询后的到的结果
+     */
+    @Override
+    public List<User> queryByEmailAndPassword(String email, String password) {
+        String sql = "select * from tab_user where email = ? and password = ?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(User.class), email, password);
+}
+}
