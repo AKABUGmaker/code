@@ -1,0 +1,143 @@
+public class RouteDaoImpl implements RouteDao {
+
+
+    /**
+     * 人气旅游：是每个旅游线路收藏数量的降序获取前4条数据进行显示；
+     * 最新旅游：是每个旅游线路上架时间的降序获取前4条数据进行显示；
+     * 主题旅游：是每个旅游线路过滤为主题旅游的获取前4条数据进行显示(上架时间降序)；
+     * <p>
+     * 前提: 所有被查到的数据，都必须是已上架(rflag=1)
+     */
+
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(C3P0Util.getDataSource());
+
+    @Override
+    public List<Route> queryLikes() {
+        String sql = "select * from tab_route where rflag = 1 order by count desc limit 0 , 4";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Route.class));
+    }
+
+    @Override
+    public List<Route> queryDate() {
+        String sql = "select * from tab_route where rflag = 1 order by rdate desc limit 0, 4";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Route.class));
+    }
+
+    @Override
+    public List<Route> queryTheme() {
+        String sql = "select * from tab_route where rflag = 1 and isThemeTour = 1 order by rdate desc limit 0,4";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Route.class));
+    }
+
+    @Override
+    public List<Route> queryPage(String word, String cid, int pageOffset, int pageSize) {
+        /***
+         *
+         *通过搜索查询,sql语句需要四个参数
+         * 将参数放进数组内,最后再将数组放入jdbc查询方法
+         * 将数据库语句用builder语句拆分成各个段落
+         * 通过参数判断sql语句的条件是否有添加进去的必要
+         *
+         */
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("select * from tab_route where rflag = 1");
+
+
+        //创建条件集合,方便添加条件
+        List<Object> parameters = new ArrayList<>();
+        //判断cid是否发过来,发过来就将其放入sql语句中
+        if (cid != null && !cid.equals("")) {
+            sql.append(" and cid=?");
+            parameters.add(cid);
+        }
+        //判断word
+        if (word != null && !word.equals("")) {
+            sql.append(" and rname like ?");
+            parameters.add("%" + word + "%");//'%?%',用jdbc不需要单引号
+        }
+
+        sql.append(" order by rdate desc limit ?,?");
+        parameters.add(pageOffset);
+        parameters.add(pageSize);
+
+
+        //String sql = "select * from tab_route where rflag = 1 and cid = ? order by rdate desc limit ?,?;";
+        return jdbcTemplate.query(sql.toString(), new BeanPropertyRowMapper<>(Route.class), parameters.toArray());
+    }
+
+    @Override
+    public int queryRecordCount(String word, String cid) {
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("select count(*) from tab_route where rflag = 1");
+
+
+        List<Object> parameters = new ArrayList<>();
+        //判断cid是否发过来,发过来就将其放入sql语句中
+        if (cid != null && !cid.equals("")) {
+            sql.append(" and cid=?");
+            parameters.add(cid);
+        }
+        //判断word
+        if (word != null && !word.equals("")) {
+            sql.append(" and rname like ?");
+            parameters.add("%" + word + "%");//'%?%',用jdbc不需要单引号
+        }
+        //String sql = "select count(*) from tab_route where rflag = 1 and cid = ?;";
+        return jdbcTemplate.queryForObject(sql.toString(), int.class, parameters.toArray());
+    }
+
+    @Override
+    public Route queryById(String rid) {
+        String sql = "select * from tab_route where rflag = 1 and rid = ?";
+        List<Route> query = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Route.class), rid);
+        if (query.size() == 1) {
+            return query.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Favorite queryFavorite(int uid, String rid) {
+        String sql = "select * from tab_favorite where uid = ? and rid = ?";
+        List<Favorite> query = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Favorite.class), uid, rid);
+        if (query.size() == 1) {
+            return query.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public int favorite(int uid, String rid) {
+        //因为要操作两张表,所以要用到事务
+
+        //返回值
+        int result = 0;
+
+        TransactionSynchronizationManager.initSynchronization();
+
+        try {
+            Connection connection = C3P0Util.getConnection();
+            connection.setAutoCommit(false);
+
+            String sql = "update tab_route set count=count+1 where rid = ?";
+            int update = jdbcTemplate.update(sql, rid);
+            result+=update;
+
+            sql = "insert into tab_favorite(`uid`, `rid`, `date`) values (?, ?, ?)";
+            int update1 = jdbcTemplate.update(sql, uid, rid, new Date());
+            result+=update1;
+
+            connection.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+
+
+    }
+}
