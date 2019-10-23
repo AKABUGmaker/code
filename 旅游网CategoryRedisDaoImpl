@@ -1,0 +1,46 @@
+public class CategoryRedisDaoImpl implements CategoryDao {
+    //获得jedis
+    private Jedis jedis = JedisUtil.getJedis();
+
+    @Override
+    public List<Category> queryAll() {
+        //获得jedis查询到的字符串集合
+        List<String> categories = jedis.lrange("heima.travel.categories", 0, -1);
+        //创建一个Category集合
+        //通过ObjectMapper对象将字符串转变为Category对象
+        List<Category> result = new ArrayList<>();
+        //遍历字符串集合
+        for (String category : categories) {
+            ObjectMapper mapper = new ObjectMapper();
+            Category c = null;
+            try {
+                c = mapper.readValue(category, Category.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            result.add(c);
+        }
+        return result;
+        //将转换后的对象添加到Category集合中并返回
+    }
+
+    @Override
+    public int append(List<Category> categories) {
+
+        for (Category category : categories) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                String s = mapper.writeValueAsString(category);
+                jedis.rpush("heima.travel.categories", s);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return categories.size();
+    }
+
+    @Override
+    public Category queryById(int cid) {
+        return null;
+    }
+}
