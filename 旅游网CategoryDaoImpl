@@ -1,0 +1,27 @@
+public class CategoryDaoImpl implements CategoryDao{
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(C3P0Util.getDataSource());
+    @Override
+    public List<Category> queryAll() {
+        String sql = "select * from tab_category";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Category.class));
+    }
+
+
+    //向数据库中插入数据
+    @Override
+    public int append(List<Category> categories) {
+        return 0;
+    }
+
+    @Override
+    public Category queryById(int cid) {
+        String  sql = "select * from tab_category where cid = ?";
+        List<Category> categories = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Category.class), cid);
+
+        if(categories.size() == 1){
+            return categories.get(0);
+        }else {
+            return null;
+        }
+    }
+}
