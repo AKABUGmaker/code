@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script src="node_modules/vue/dist/vue.js"></script>
+<body>
+<div id="app">
+    {{msg}}
+    <br>
+    <input type="button" value="开始" v-on:click="startRun">
+    <input type="button" value="暂停" v-on:click="endRun">
+</div>
+
+<script>
+    var dataObj = {
+        msg: "我们是冠军!!!!!!!!!!!!"
+    };
+    var vu = new Vue({
+        el: "#app",
+        data: dataObj,
+        methods:
+            {
+
+                startRun: function f() {
+                         interval = setInterval(()=> {
+                        var startMsg = this.msg.substring(0, 1);
+                        var endMsg = this.msg.substring(1);
+                        this.msg = endMsg + startMsg;
+                    },400);
+                },
+                endRun:function () {
+                    clearInterval(interval)
+                }
+            },
+        beforeCreate() {
+            console.log("beforeCreate" + this.msg);
+        },
+        created() {
+            //发送ajax请求数据
+            console.log("created" + this.msg);
+        },
+        beforeMount() {
+            console.log("beforeMount");
+        },
+        mounted() {
+            //发送ajax请求数据,并且可以操作dom（$("#name").val("李德华")）
+            console.log("mounted");
+        },
+        beforeUpdate() {
+            console.log("beforeUpdate");
+        },
+        updated() {
+            console.log("updated");
+        },
+        beforeDestroy() {
+            console.log("beforeDestroy");
+        },
+        destroyed() {
+            console.log("destroyed");
+        }
+
+    })
+</script>
+
+</body>
+</html>
