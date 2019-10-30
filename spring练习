@@ -1,0 +1,26 @@
+public interface UserMapper {
+
+    public User selectUserById(@Param("id")Long id);
+
+    public void deleteUserById(@Param("id")long id);
+}
+
+public interface UserService {
+    public User findUserById(Long id);
+
+    public void deleteUserById(long id);
+}
+
+@Controller
+@RequestMapping("user")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    @RequestMapping("showuser")
+    public String showUser(@RequestParam("id")long id, Model model){
+        User user = userService.findUserById(id);
+        model.addAttribute("user",user);
+        return "user";
+    }
