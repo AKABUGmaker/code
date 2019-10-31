@@ -1,0 +1,31 @@
+@RequestMapping("/order")
+@RestController
+public class OrderController {
+
+    //    com.itheima.service.UserService
+    //loadbalance配置负载均衡（默认随机，轮训，最少活跃数，一致性hash）
+    //retries重试默认2次 + 调用一次
+    @Reference(loadbalance = "roundrobin",timeout = 2010,retries = 0)
+    UserService userService;
+
+    @RequestMapping(path = "/createorder",produces = "application/json; charset=UTF-8")
+    public String createOrder(Integer userId){
+        String result = "订单创建成功";
+
+
+        String address = userService.getUserAddressByUserId(userId);
+
+        return result + "," + address;
+    }
+
+}
+
+@Service
+public class UserServiceImpl implements UserService {
+    @Override
+    public String getUserAddressByUserId(Integer userId) {
+
+        System.out.println("20880");
+        return "******" +userId;
+    }
+}
